@@ -3,10 +3,13 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { sanityClient, Workshop, urlFor } from '@/lib/sanity';
-import { Calendar, Clock, User } from 'lucide-react';
+import { Calendar, User } from 'lucide-react';
+import WorkshopDetailDialog from '@/components/WorkshopDetailDialog';
 
 const Workshops = () => {
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
+  const [selectedWorkshop, setSelectedWorkshop] = useState<Workshop | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchWorkshops = async () => {
@@ -31,6 +34,11 @@ const Workshops = () => {
     fetchWorkshops();
   }, []);
 
+  const handleCardClick = (workshop: Workshop) => {
+    setSelectedWorkshop(workshop);
+    setDialogOpen(true);
+  };
+
   return (
     <div className="min-h-screen py-20">
       <div className="container mx-auto px-4">
@@ -54,7 +62,10 @@ const Workshops = () => {
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
             >
-              <Card className="h-full hover:shadow-xl hover:shadow-primary/10 transition-all group overflow-hidden">
+              <Card 
+                className="h-full hover:shadow-xl hover:shadow-primary/10 transition-all group overflow-hidden cursor-pointer"
+                onClick={() => handleCardClick(workshop)}
+              >
                 {workshop.image && (
                   <div className="aspect-video w-full overflow-hidden">
                     <img 
@@ -73,7 +84,7 @@ const Workshops = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <p className="text-muted-foreground leading-relaxed">{workshop.description}</p>
+                  <p className="text-muted-foreground leading-relaxed line-clamp-2">{workshop.description}</p>
                   
                   <div className="space-y-2 pt-4 border-t border-border">
                     {workshop.instructor && (
@@ -89,25 +100,26 @@ const Workshops = () => {
                       <span className="text-foreground font-medium">
                         {new Date(workshop.date).toLocaleDateString('en-US', { 
                           year: 'numeric', 
-                          month: 'long', 
+                          month: 'short', 
                           day: 'numeric' 
                         })}
                       </span>
                     </div>
-                    {workshop.duration && (
-                      <div className="flex items-center space-x-2 text-sm">
-                        <Clock size={16} className="text-primary flex-shrink-0" />
-                        <span className="text-muted-foreground">Duration:</span>
-                        <span className="text-foreground font-medium">{workshop.duration}</span>
-                      </div>
-                    )}
                   </div>
+
+                  <p className="text-xs text-primary font-medium pt-2">Click for details →</p>
                 </CardContent>
               </Card>
             </motion.div>
           ))}
         </div>
       </div>
+
+      <WorkshopDetailDialog 
+        workshop={selectedWorkshop}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      />
     </div>
   );
 };

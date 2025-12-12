@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { sanityClient, Event, urlFor } from '@/lib/sanity';
-import { Calendar, MapPin, Clock, ExternalLink, FileText } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Calendar, MapPin, Clock } from 'lucide-react';
+import EventDetailDialog from '@/components/EventDetailDialog';
 
 const Events = () => {
   const [events, setEvents] = useState<Event[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -33,6 +34,11 @@ const Events = () => {
     fetchEvents();
   }, []);
 
+  const handleCardClick = (event: Event) => {
+    setSelectedEvent(event);
+    setDialogOpen(true);
+  };
+
   return (
     <div className="min-h-screen py-20">
       <div className="container mx-auto px-4">
@@ -56,7 +62,10 @@ const Events = () => {
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
             >
-              <Card className="h-full hover:shadow-xl hover:shadow-primary/10 transition-all group overflow-hidden">
+              <Card 
+                className="h-full hover:shadow-xl hover:shadow-primary/10 transition-all group overflow-hidden cursor-pointer"
+                onClick={() => handleCardClick(event)}
+              >
                 {event.image && (
                   <div className="aspect-video w-full overflow-hidden">
                     <img 
@@ -82,64 +91,38 @@ const Events = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <p className="text-muted-foreground leading-relaxed">{event.description}</p>
+                  <p className="text-muted-foreground leading-relaxed line-clamp-2">{event.description}</p>
                   
                   <div className="space-y-2 pt-2 border-t border-border">
                     <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                       <Calendar size={16} className="text-primary flex-shrink-0" />
                       <span>{new Date(event.date).toLocaleDateString('en-US', { 
-                        weekday: 'long', 
                         year: 'numeric', 
-                        month: 'long', 
+                        month: 'short', 
                         day: 'numeric' 
                       })}</span>
                     </div>
-                    {event.time && (
-                      <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                        <Clock size={16} className="text-primary flex-shrink-0" />
-                        <span>{event.time}</span>
-                      </div>
-                    )}
                     {event.venue && (
                       <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                         <MapPin size={16} className="text-primary flex-shrink-0" />
-                        <span>{event.venue}</span>
+                        <span className="line-clamp-1">{event.venue}</span>
                       </div>
                     )}
                   </div>
 
-                  <div className="flex gap-3 pt-4">
-                    {event.rulebook && (
-                      <Button variant="outline" className="flex-1" asChild>
-                        <a href={event.rulebook} target="_blank" rel="noopener noreferrer">
-                          <FileText size={16} className="mr-2" />
-                          Rulebook
-                        </a>
-                      </Button>
-                    )}
-                    {event.eventLink && (
-                      <Button variant="outline" className="flex-1" asChild>
-                        <a href={event.eventLink} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink size={16} className="mr-2" />
-                          Event Link
-                        </a>
-                      </Button>
-                    )}
-                  </div>
-
-                  {event.registrationOpen && (
-                    <Link to="/register">
-                      <Button className="w-full">
-                        Register Now
-                      </Button>
-                    </Link>
-                  )}
+                  <p className="text-xs text-primary font-medium pt-2">Click for details →</p>
                 </CardContent>
               </Card>
             </motion.div>
           ))}
         </div>
       </div>
+
+      <EventDetailDialog 
+        event={selectedEvent}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      />
     </div>
   );
 };
