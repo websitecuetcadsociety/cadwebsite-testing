@@ -10,12 +10,14 @@ import ImageLightbox from '@/components/ImageLightbox';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import heroImage from '../assets/hero-cad-bg-new.jpg';
 import cadLogo from '../assets/cad-logo.png';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Home = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,80 +53,41 @@ const Home = () => {
       
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#030712]">
-        {/* Animated gradient orbs */}
+        {/* Animated gradient orbs - simplified on mobile */}
         <div className="absolute inset-0 overflow-hidden">
-          <motion.div 
-            className="absolute top-1/4 -left-32 w-96 h-96 bg-primary/30 rounded-full blur-[120px]"
-            animate={{ 
-              scale: [1, 1.2, 1],
-              opacity: [0.3, 0.5, 0.3],
-            }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.div 
-            className="absolute bottom-1/4 -right-32 w-80 h-80 bg-accent/20 rounded-full blur-[100px]"
-            animate={{ 
-              scale: [1.2, 1, 1.2],
-              opacity: [0.2, 0.4, 0.2],
-            }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.div 
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[150px]"
-            animate={{ 
-              rotate: [0, 360],
-            }}
-            transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-          />
+          <div className="absolute top-1/4 -left-32 w-96 h-96 bg-primary/30 rounded-full blur-[120px]" />
+          <div className="absolute bottom-1/4 -right-32 w-80 h-80 bg-accent/20 rounded-full blur-[100px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[150px]" />
         </div>
 
-        {/* Floating geometric shapes */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {/* Rotating ring */}
-          <motion.div
-            className="absolute top-20 right-20 w-32 h-32 border-2 border-primary/30 rounded-full"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          />
-          <motion.div
-            className="absolute top-24 right-24 w-24 h-24 border border-primary/20 rounded-full"
-            animate={{ rotate: -360 }}
-            transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-          />
-          
-          {/* Floating squares */}
-          <motion.div
-            className="absolute bottom-32 left-20 w-16 h-16 border border-primary/40 rotate-45"
-            animate={{ y: [-10, 10, -10], rotate: [45, 55, 45] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.div
-            className="absolute top-40 left-1/4 w-8 h-8 bg-primary/20 rotate-12"
-            animate={{ y: [0, -20, 0], x: [0, 10, 0] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          />
-          
-          {/* Dots pattern */}
-          {[...Array(20)].map((_, i) => (
+        {/* Floating geometric shapes - desktop only */}
+        {!isMobile && (
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {/* Rotating ring */}
             <motion.div
-              key={i}
-              className="absolute w-1 h-1 bg-primary/50 rounded-full"
-              style={{
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-              }}
-              animate={{ 
-                opacity: [0.2, 0.8, 0.2],
-                scale: [1, 1.5, 1],
-              }}
-              transition={{ 
-                duration: 3 + Math.random() * 2,
-                repeat: Infinity,
-                delay: Math.random() * 2,
-              }}
+              className="absolute top-20 right-20 w-32 h-32 border-2 border-primary/30 rounded-full"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
             />
-          ))}
-        </div>
+            <motion.div
+              className="absolute top-24 right-24 w-24 h-24 border border-primary/20 rounded-full"
+              animate={{ rotate: -360 }}
+              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+            />
+            
+            {/* Floating squares */}
+            <motion.div
+              className="absolute bottom-32 left-20 w-16 h-16 border border-primary/40 rotate-45"
+              animate={{ y: [-10, 10, -10], rotate: [45, 55, 45] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.div
+              className="absolute top-40 left-1/4 w-8 h-8 bg-primary/20 rotate-12"
+              animate={{ y: [0, -20, 0], x: [0, 10, 0] }}
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </div>
+        )}
 
         {/* Grid lines */}
         <div className="absolute inset-0" style={{ 
