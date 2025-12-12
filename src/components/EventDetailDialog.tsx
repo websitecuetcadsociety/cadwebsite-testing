@@ -1,8 +1,9 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { Event, urlFor } from '@/lib/sanity';
-import { Calendar, MapPin, Clock, ExternalLink, FileText } from 'lucide-react';
+import { Calendar, MapPin, Clock, ExternalLink, FileText, Tag, CheckCircle, XCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface EventDetailDialogProps {
@@ -14,9 +15,13 @@ interface EventDetailDialogProps {
 const EventDetailDialog = ({ event, open, onOpenChange }: EventDetailDialogProps) => {
   if (!event) return null;
 
+  const eventDate = new Date(event.date);
+  const isPastEvent = eventDate < new Date();
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        {/* Event Image */}
         {event.image && (
           <div className="aspect-video w-full overflow-hidden rounded-lg -mt-2 mb-4">
             <img 
@@ -26,59 +31,95 @@ const EventDetailDialog = ({ event, open, onOpenChange }: EventDetailDialogProps
             />
           </div>
         )}
+
         <DialogHeader>
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex-1">
-              <DialogTitle className="text-2xl text-foreground mb-2">
-                {event.title}
-              </DialogTitle>
-              <div className="flex gap-2 flex-wrap">
-                {event.eventType && (
-                  <Badge variant="secondary">{event.eventType}</Badge>
-                )}
-                {event.registrationOpen && (
-                  <Badge className="bg-primary">Registration Open</Badge>
-                )}
-              </div>
+          <div className="space-y-3">
+            <DialogTitle className="text-2xl md:text-3xl text-foreground font-bold">
+              {event.title}
+            </DialogTitle>
+            <div className="flex gap-2 flex-wrap">
+              {event.eventType && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  <Tag size={12} />
+                  {event.eventType}
+                </Badge>
+              )}
+              {event.registrationOpen ? (
+                <Badge className="bg-primary flex items-center gap-1">
+                  <CheckCircle size={12} />
+                  Registration Open
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="flex items-center gap-1 text-muted-foreground">
+                  <XCircle size={12} />
+                  Registration Closed
+                </Badge>
+              )}
+              {isPastEvent && (
+                <Badge variant="outline" className="text-muted-foreground">Past Event</Badge>
+              )}
             </div>
           </div>
         </DialogHeader>
+
+        <Separator className="my-4" />
         
-        <div className="space-y-4">
-          <p className="text-muted-foreground leading-relaxed">{event.description}</p>
-          
-          <div className="space-y-3 p-4 rounded-lg bg-muted/50 border border-border">
-            <div className="flex items-center space-x-3 text-sm">
-              <Calendar size={18} className="text-primary flex-shrink-0" />
-              <span className="text-foreground font-medium">
-                {new Date(event.date).toLocaleDateString('en-US', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}
-              </span>
-            </div>
-            {event.time && (
-              <div className="flex items-center space-x-3 text-sm">
-                <Clock size={18} className="text-primary flex-shrink-0" />
-                <span className="text-foreground font-medium">{event.time}</span>
+        <div className="space-y-6">
+          {/* Description */}
+          <div>
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">About This Event</h3>
+            <DialogDescription className="text-foreground leading-relaxed text-base">
+              {event.description}
+            </DialogDescription>
+          </div>
+
+          {/* Event Details Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Date & Time Card */}
+            <div className="p-4 rounded-lg bg-muted/50 border border-border space-y-3">
+              <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">Date & Time</h4>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-3 text-sm">
+                  <Calendar size={18} className="text-primary flex-shrink-0" />
+                  <div>
+                    <p className="text-foreground font-medium">
+                      {eventDate.toLocaleDateString('en-US', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
+                    </p>
+                  </div>
+                </div>
+                {event.time && (
+                  <div className="flex items-center space-x-3 text-sm">
+                    <Clock size={18} className="text-primary flex-shrink-0" />
+                    <span className="text-foreground font-medium">{event.time}</span>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
+
+            {/* Venue Card */}
             {event.venue && (
-              <div className="flex items-center space-x-3 text-sm">
-                <MapPin size={18} className="text-primary flex-shrink-0" />
-                <span className="text-foreground font-medium">{event.venue}</span>
+              <div className="p-4 rounded-lg bg-muted/50 border border-border space-y-3">
+                <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">Venue</h4>
+                <div className="flex items-start space-x-3 text-sm">
+                  <MapPin size={18} className="text-primary flex-shrink-0 mt-0.5" />
+                  <span className="text-foreground font-medium">{event.venue}</span>
+                </div>
               </div>
             )}
           </div>
 
-          <div className="flex gap-3 pt-2">
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
             {event.rulebook && (
               <Button variant="outline" className="flex-1" asChild>
                 <a href={event.rulebook} target="_blank" rel="noopener noreferrer">
                   <FileText size={16} className="mr-2" />
-                  Rulebook
+                  View Rulebook
                 </a>
               </Button>
             )}
@@ -86,15 +127,16 @@ const EventDetailDialog = ({ event, open, onOpenChange }: EventDetailDialogProps
               <Button variant="outline" className="flex-1" asChild>
                 <a href={event.eventLink} target="_blank" rel="noopener noreferrer">
                   <ExternalLink size={16} className="mr-2" />
-                  Event Link
+                  Event Details
                 </a>
               </Button>
             )}
           </div>
 
-          {event.registrationOpen && (
-            <Link to="/register" onClick={() => onOpenChange(false)}>
-              <Button className="w-full">
+          {/* Registration Button */}
+          {event.registrationOpen && !isPastEvent && (
+            <Link to="/register" onClick={() => onOpenChange(false)} className="block">
+              <Button className="w-full text-lg py-6">
                 Register Now
               </Button>
             </Link>
