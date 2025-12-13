@@ -37,26 +37,26 @@ const EventDetailDialog = ({ event, open, onOpenChange }: EventDetailDialogProps
             <DialogTitle className="text-2xl md:text-3xl text-foreground font-bold">
               {event.title}
             </DialogTitle>
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 flex-wrap items-start">
               {event.eventType && (
-                <Badge variant="secondary" className="flex items-center gap-1">
-                  <Tag size={12} />
+                <Badge variant="secondary" className="flex items-center gap-1 text-xs px-2 py-1 whitespace-nowrap">
+                  <Tag size={10} />
                   {event.eventType}
                 </Badge>
               )}
               {event.registrationOpen ? (
-                <Badge className="bg-primary flex items-center gap-1">
-                  <CheckCircle size={12} />
-                  Registration Open
+                <Badge className="bg-primary flex items-center gap-1 text-xs px-2 py-1 whitespace-nowrap">
+                  <CheckCircle size={10} />
+                  Open
                 </Badge>
               ) : (
-                <Badge variant="outline" className="flex items-center gap-1 text-muted-foreground">
-                  <XCircle size={12} />
-                  Registration Closed
+                <Badge variant="outline" className="flex items-center gap-1 text-xs px-2 py-1 text-muted-foreground whitespace-nowrap">
+                  <XCircle size={10} />
+                  Closed
                 </Badge>
               )}
               {isPastEvent && (
-                <Badge variant="outline" className="text-muted-foreground">Past Event</Badge>
+                <Badge variant="outline" className="text-xs px-2 py-1 text-muted-foreground whitespace-nowrap">Past</Badge>
               )}
             </div>
           </div>
