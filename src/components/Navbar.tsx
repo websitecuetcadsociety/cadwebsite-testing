@@ -19,12 +19,12 @@ const Navbar = () => {
   const isActive = (path: string) => location.pathname === path;
   return <nav className="fixed top-0 w-full z-50 bg-background/98 backdrop-blur-xl border-b border-border/50 shadow-lg shadow-primary/5">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-14 md:h-20">
+        <div className="flex justify-between items-center h-12 md:h-16">
           <Link to="/" className="flex items-center space-x-3 group">
             <img 
               src={cadLogo} 
               alt="CUET CAD Society" 
-              className="h-10 md:h-20 w-auto"
+              className="h-8 md:h-12 w-auto"
             />
           </Link>
 

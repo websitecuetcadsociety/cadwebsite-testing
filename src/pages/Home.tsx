@@ -97,7 +97,7 @@ const Home = () => {
         }} />
 
         {/* Main content */}
-        <div className="relative z-10 container mx-auto px-4 pt-20">
+        <div className="relative z-10 container mx-auto px-4 pt-8 md:pt-20">
           <div className="flex flex-col items-center text-center max-w-5xl mx-auto">
             {/* Badge */}
             <motion.div
