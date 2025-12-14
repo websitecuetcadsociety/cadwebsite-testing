@@ -24,17 +24,17 @@ const Navbar = () => {
             <img 
               src={cadLogo} 
               alt="CUET CAD Society" 
-              className="h-8 md:h-12 w-auto"
+              className="h-10 md:h-14 w-auto"
             />
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-2">
+          <div className="hidden lg:flex items-center space-x-1">
             {navLinks.map(link => (
               <Link 
                 key={link.path} 
                 to={link.path} 
-                className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
                   isActive(link.path) 
                     ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30' 
                     : 'text-muted-foreground hover:text-foreground hover:bg-secondary/80'
@@ -59,7 +59,7 @@ const Navbar = () => {
           </div>
 
           {/* Mobile Menu Button */}
-          <button onClick={() => setIsOpen(!isOpen)} className="md:hidden text-foreground p-2">
+          <button onClick={() => setIsOpen(!isOpen)} className="lg:hidden text-foreground p-2">
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
@@ -71,7 +71,7 @@ const Navbar = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden overflow-hidden border-t border-border/30"
+              className="lg:hidden overflow-hidden border-t border-border/30"
             >
               <div className="py-4 space-y-2">
                 {navLinks.map(link => (
