@@ -45,6 +45,12 @@ function doPost(e) {
         email: data.email,
         department: data.department,
         year: data.year,
+        batchNo: data.batchNo,
+        mobileNo: data.mobileNo,
+        linkedinId: data.linkedinId,
+        facebookId: data.facebookId,
+        paymentMethod: data.paymentMethod,
+        transactionId: data.transactionId,
         imageUrl: imageUrl
       }
     );
@@ -156,6 +162,12 @@ function appendToSheet(sheetId, registrationType, data) {
       data.email,
       data.department,
       data.year,
+      data.batchNo,
+      data.mobileNo,
+      data.linkedinId,
+      data.facebookId,
+      data.paymentMethod,
+      data.transactionId,
       data.imageUrl,
       'Pending' // Status
     ];
