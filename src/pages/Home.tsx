@@ -3,12 +3,11 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { sanityClient, Message, Activity, MediaItem, urlFor } from '@/lib/sanity';
-import { Calendar, Users, Award, ArrowRight } from 'lucide-react';
+import { Calendar, Users, Award, ArrowRight, Quote, Sparkles, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import ImageLightbox from '@/components/ImageLightbox';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import heroImage from '../assets/hero-cad-bg-new.jpg';
 import cadLogo from '../assets/cad-logo.png';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -46,68 +45,74 @@ const Home = () => {
     fetchData();
   }, []);
 
+  const stats = [
+    { icon: Users, label: 'Active Members', value: '150+', color: 'from-primary to-emerald-400' },
+    { icon: Calendar, label: 'Events Organized', value: '50+', color: 'from-accent to-cyan-400' },
+    { icon: Award, label: 'Workshops Conducted', value: '30+', color: 'from-primary to-accent' },
+  ];
+
   return (
-    <div className="min-h-screen">
-      {/* Tech grid background overlay */}
-      <div className="fixed inset-0 pointer-events-none" style={{ background: 'var(--grid-pattern)' }}></div>
-      
+    <div className="min-h-screen overflow-x-hidden">
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#030712]">
-        {/* Animated gradient orbs - simplified on mobile */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/4 -left-32 w-96 h-96 bg-primary/30 rounded-full blur-[120px]" />
-          <div className="absolute bottom-1/4 -right-32 w-80 h-80 bg-accent/20 rounded-full blur-[100px]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[150px]" />
+      <section className="relative min-h-screen flex items-center justify-center">
+        {/* Background layers */}
+        <div className="absolute inset-0 bg-background">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.15),transparent_50%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,hsl(var(--accent)/0.1),transparent_50%)]" />
         </div>
 
-        {/* Floating geometric shapes - desktop only */}
+        {/* Animated grid - desktop only */}
         {!isMobile && (
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {/* Rotating ring */}
-            <motion.div
-              className="absolute top-20 right-20 w-32 h-32 border-2 border-primary/30 rounded-full"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-            />
-            <motion.div
-              className="absolute top-24 right-24 w-24 h-24 border border-primary/20 rounded-full"
-              animate={{ rotate: -360 }}
-              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-            />
-            
-            {/* Floating squares */}
-            <motion.div
-              className="absolute bottom-32 left-20 w-16 h-16 border border-primary/40 rotate-45"
-              animate={{ y: [-10, 10, -10], rotate: [45, 55, 45] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <motion.div
-              className="absolute top-40 left-1/4 w-8 h-8 bg-primary/20 rotate-12"
-              animate={{ y: [0, -20, 0], x: [0, 10, 0] }}
-              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            />
-          </div>
+          <div className="absolute inset-0 opacity-30" style={{ 
+            backgroundImage: `linear-gradient(hsl(var(--primary)/0.1) 1px, transparent 1px),
+                             linear-gradient(90deg, hsl(var(--primary)/0.1) 1px, transparent 1px)`,
+            backgroundSize: '60px 60px'
+          }} />
         )}
 
-        {/* Grid lines */}
-        <div className="absolute inset-0" style={{ 
-          backgroundImage: `linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
-                           linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px)`,
-          backgroundSize: '50px 50px'
-        }} />
+        {/* Floating elements - desktop only */}
+        {!isMobile && (
+          <>
+            <motion.div
+              className="absolute top-32 right-[15%] w-20 h-20 border border-primary/30 rounded-full"
+              animate={{ y: [-10, 10, -10], rotate: [0, 180, 360] }}
+              transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+            />
+            <motion.div
+              className="absolute bottom-40 left-[10%] w-3 h-3 bg-primary rounded-full"
+              animate={{ y: [-20, 20, -20], opacity: [0.3, 1, 0.3] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.div
+              className="absolute top-1/2 right-[8%] w-2 h-2 bg-accent rounded-full"
+              animate={{ y: [-15, 15, -15] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </>
+        )}
 
-        {/* Main content */}
-        <div className="relative z-10 container mx-auto px-4 pt-8 md:pt-20">
-          <div className="flex flex-col items-center text-center max-w-5xl mx-auto">
+        {/* Hero content */}
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 py-20 lg:py-0">
+          <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
+            {/* Logo */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6 }}
+              className="mb-6 sm:mb-8"
+            >
+              <img src={cadLogo} alt="CAD Society" className="h-20 sm:h-24 md:h-28 w-auto" />
+            </motion.div>
+
             {/* Badge */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="mb-6"
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="mb-4 sm:mb-6"
             >
-              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-primary/10 text-primary text-sm font-medium backdrop-blur-sm">
-                <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+              <span className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-primary/40 bg-primary/10 text-primary text-xs sm:text-sm font-medium">
+                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
                 CUET CAD Society
               </span>
             </motion.div>
@@ -116,16 +121,17 @@ const Home = () => {
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight"
+              transition={{ duration: 0.7, delay: 0.3 }}
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 leading-tight tracking-tight"
             >
               <span className="text-foreground">Where </span>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-emerald-400">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
                 Creativity
               </span>
-              <br />
+              <br className="hidden sm:block" />
+              <span className="sm:hidden"> </span>
               <span className="text-foreground">Meets </span>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent via-primary to-teal-300">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-primary">
                 Engineering
               </span>
             </motion.h1>
@@ -134,8 +140,8 @@ const Home = () => {
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-10"
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-xl sm:max-w-2xl mb-8 sm:mb-10 px-2"
             >
               Empowering future engineers through design excellence, innovation, and hands-on CAD mastery at CUET.
             </motion.p>
@@ -144,109 +150,118 @@ const Home = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-              className="flex flex-col sm:flex-row gap-4 mb-16"
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto px-4 sm:px-0"
             >
-              <Link to="/events">
-                <Button size="lg" className="px-8 py-6 text-lg font-semibold shadow-2xl shadow-primary/40 hover:shadow-primary/60 transition-all group">
-                  <span>Join the Society</span>
-                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <Link to="/events" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full sm:w-auto px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base font-semibold shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-all group">
+                  Join the Society
+                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Link to="/events">
-                <Button size="lg" variant="outline" className="px-8 py-6 text-lg border-primary/50 bg-primary/5 hover:bg-primary/10 hover:border-primary">
+              <Link to="/events" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base border-primary/40 hover:bg-primary/10 hover:border-primary">
                   Explore Events
                 </Button>
               </Link>
             </motion.div>
-
-            {/* Stats Section */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.8 }}
-              className="w-full"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 max-w-4xl mx-auto">
-                {[
-                  { icon: Users, label: 'Active Members', value: '150+' },
-                  { icon: Calendar, label: 'Events Organized', value: '50+' },
-                  { icon: Award, label: 'Workshops Conducted', value: '30+' },
-                ].map((stat, index) => (
-                  <motion.div
-                    key={index}
-                    whileHover={{ y: -4, scale: 1.02 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                  >
-                    <Card className="bg-card/30 backdrop-blur-xl border-primary/20 hover:border-primary/50 transition-all duration-300 overflow-hidden group">
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <CardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3 relative">
-                        <div className="p-3 bg-primary/20 rounded-xl group-hover:bg-primary/30 transition-colors">
-                          <stat.icon className="text-primary" size={28} />
-                        </div>
-                        <div>
-                          <div className="text-3xl md:text-4xl font-bold text-foreground">{stat.value}</div>
-                          <div className="text-sm text-muted-foreground">{stat.label}</div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
           </div>
         </div>
 
-        {/* Bottom gradient fade */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
+        {/* Scroll indicator */}
+        <motion.div 
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:block"
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        >
+          <div className="w-6 h-10 border-2 border-primary/40 rounded-full flex justify-center pt-2">
+            <div className="w-1 h-2 bg-primary rounded-full" />
+          </div>
+        </motion.div>
       </section>
 
-      {/* Messages Section */}
-      <section className="py-20 bg-background relative">
-        {/* Decorative tech elements */}
-        <div className="absolute top-20 right-20 w-32 h-32 border-2 border-primary/20 rounded-lg rotate-45"></div>
-        <div className="absolute bottom-20 left-20 w-24 h-24 border-2 border-primary/20 rounded-full"></div>
-        
-        <div className="container mx-auto px-4 relative z-10">
-          <motion.h2
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-4xl md:text-5xl font-bold text-center mb-12 text-foreground"
-          >
-            Words from Our Leaders
-          </motion.h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {messages.map((message, index) => (
+      {/* Stats Section */}
+      <section className="py-12 sm:py-16 bg-secondary/30 relative">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto">
+            {stats.map((stat, index) => (
               <motion.div
-                key={message._id}
-                initial={{ opacity: 0, y: 30 }}
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -6 }}
               >
-                <Card className="h-full hover:shadow-2xl hover:shadow-primary/30 transition-all border-border/50 group">
-                  <CardContent className="p-8 flex flex-col items-center space-y-6">
-                    {message.image ? (
-                      <img 
-                        src={urlFor(message.image)} 
-                        alt={message.name}
-                        className="w-32 h-32 rounded-full object-cover ring-4 ring-primary/20 group-hover:ring-primary/50 transition-all"
-                      />
-                    ) : (
-                      <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-3xl font-bold ring-4 ring-primary/20 group-hover:ring-primary/50 transition-all">
-                        {message.name.split(' ').map(n => n[0]).join('')}
-                      </div>
-                    )}
-                    <div className="text-center space-y-2">
-                      <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">{message.name}</h3>
-                      <p className="text-sm font-medium text-primary">{message.position}</p>
+                <Card className="bg-card/50 backdrop-blur border-border/50 hover:border-primary/30 transition-all group">
+                  <CardContent className="p-4 sm:p-6 flex items-center gap-4">
+                    <div className={`p-2.5 sm:p-3 rounded-xl bg-gradient-to-br ${stat.color} bg-opacity-20`}>
+                      <stat.icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
                     </div>
-                    <p className="text-muted-foreground text-center italic leading-relaxed group-hover:text-foreground transition-colors">
-                      "{message.message}"
-                    </p>
+                    <div>
+                      <div className="text-2xl sm:text-3xl font-bold text-foreground">{stat.value}</div>
+                      <div className="text-xs sm:text-sm text-muted-foreground">{stat.label}</div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Messages from Leaders */}
+      <section className="py-16 sm:py-20 bg-background relative">
+        <div className="container mx-auto px-4 sm:px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-10 sm:mb-12"
+          >
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3">
+              Words from Our <span className="text-primary">Leaders</span>
+            </h2>
+            <p className="text-sm sm:text-base text-muted-foreground max-w-lg mx-auto">
+              Inspiring messages from those who shape our community
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {messages.map((message, index) => (
+              <motion.div
+                key={message._id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="h-full bg-card/50 border-border/50 hover:border-primary/30 transition-all group overflow-hidden">
+                  <CardContent className="p-5 sm:p-6">
+                    <div className="flex items-start gap-4 mb-4">
+                      {message.image ? (
+                        <img 
+                          src={urlFor(message.image)} 
+                          alt={message.name}
+                          className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover ring-2 ring-primary/30 group-hover:ring-primary/50 transition-all flex-shrink-0"
+                        />
+                      ) : (
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-primary-foreground text-lg sm:text-xl font-bold ring-2 ring-primary/30 flex-shrink-0">
+                          {message.name.split(' ').map(n => n[0]).join('')}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors text-sm sm:text-base truncate">
+                          {message.name}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-primary/80">{message.position}</p>
+                      </div>
+                    </div>
+                    <div className="relative">
+                      <Quote className="absolute -top-1 -left-1 w-6 h-6 text-primary/20" />
+                      <p className="text-muted-foreground text-sm leading-relaxed pl-4 italic">
+                        {message.message}
+                      </p>
+                    </div>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -256,22 +271,31 @@ const Home = () => {
       </section>
 
       {/* Recent Activities */}
-      <section className="py-20 bg-secondary/20 relative">
-        {/* Glowing orb effect */}
-        <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
-        
-        <div className="container mx-auto px-4 relative z-10">
+      <section className="py-16 sm:py-20 bg-secondary/20 relative">
+        <div className="container mx-auto px-4 sm:px-6">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
+            className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10 sm:mb-12"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Recent Activities</h2>
-            <p className="text-xl text-muted-foreground">Stay updated with our latest events and workshops</p>
+            <div>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2">
+                Recent <span className="text-primary">Activities</span>
+              </h2>
+              <p className="text-sm sm:text-base text-muted-foreground">
+                Stay updated with our latest events and workshops
+              </p>
+            </div>
+            <Link to="/events" className="hidden sm:block">
+              <Button variant="ghost" className="text-primary hover:text-primary/80 group">
+                View All
+                <ChevronRight className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
           </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             {activities.map((activity, index) => (
               <Link key={activity._id} to="/events">
                 <motion.div
@@ -279,104 +303,95 @@ const Home = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  whileHover={{ y: -4 }}
                 >
-                  <Card className="hover:shadow-2xl hover:shadow-primary/20 transition-all duration-500 group overflow-hidden cursor-pointer border-border/50">
+                  <Card className="group cursor-pointer bg-card/50 border-border/50 hover:border-primary/30 transition-all overflow-hidden">
                     {activity.image && (
-                      <div className="aspect-video w-full overflow-hidden relative">
-                        <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent z-10"></div>
+                      <div className="aspect-video relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-t from-card/90 to-transparent z-10" />
                         <img 
                           src={urlFor(activity.image)} 
                           alt={activity.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
+                        <div className="absolute bottom-3 left-3 z-20">
+                          <span className="px-2 py-1 bg-primary/90 text-primary-foreground text-xs font-medium rounded">
+                            {new Date(activity.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </span>
+                        </div>
                       </div>
                     )}
-                    <CardContent className="p-6 relative">
-                      <div className="flex items-start space-x-4">
-                        <div className="p-3 bg-primary/20 rounded-lg group-hover:bg-primary/40 transition-colors">
-                          <Calendar className="text-primary" size={24} />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">{activity.title}</h3>
-                          <p className="text-muted-foreground mb-2">{activity.description}</p>
-                          <p className="text-sm text-primary font-medium">{new Date(activity.date).toLocaleDateString()}</p>
-                        </div>
-                      </div>
+                    <CardContent className="p-4 sm:p-5">
+                      <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors mb-2 text-sm sm:text-base">
+                        {activity.title}
+                      </h3>
+                      <p className="text-muted-foreground text-xs sm:text-sm line-clamp-2">
+                        {activity.description}
+                      </p>
                     </CardContent>
                   </Card>
                 </motion.div>
               </Link>
             ))}
           </div>
-          <div className="text-center mt-8">
+
+          <div className="mt-6 text-center sm:hidden">
             <Link to="/events">
-              <Button variant="default" size="lg" className="shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/50 transition-all">
-                View All Events
-              </Button>
+              <Button className="w-full">View All Events</Button>
             </Link>
           </div>
         </div>
       </section>
 
       {/* Media Gallery */}
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-4">
+      <section className="py-16 sm:py-20 bg-background">
+        <div className="container mx-auto px-4 sm:px-6">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
+            className="text-center mb-10 sm:mb-12"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Media Gallery</h2>
-            <p className="text-xl text-muted-foreground">Glimpses of our events and activities</p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3">
+              Media <span className="text-primary">Gallery</span>
+            </h2>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Glimpses of our events and activities
+            </p>
           </motion.div>
           
           {mediaItems.length > 0 ? (
             <Carousel className="w-full max-w-5xl mx-auto">
-              <CarouselContent>
+              <CarouselContent className="-ml-2 sm:-ml-4">
                 {mediaItems.map((item) => (
-                  <CarouselItem key={item._id} className="md:basis-1/2 lg:basis-1/3">
-                    <div className="p-2">
-                      <div 
-                        className="aspect-square rounded-lg overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl hover:shadow-primary/30 transition-all duration-500 border-2 border-border/30 hover:border-primary/50 group"
-                        onClick={() => setLightboxImage({ 
-                          src: urlFor(item.image), 
-                          alt: item.title || 'Gallery image' 
-                        })}
-                      >
-                        <div className="relative w-full h-full overflow-hidden">
-                          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                          <img 
-                            src={urlFor(item.image)} 
-                            alt={item.title || 'Gallery image'}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                          />
-                        </div>
-                      </div>
+                  <CarouselItem key={item._id} className="pl-2 sm:pl-4 basis-1/2 md:basis-1/3">
+                    <div 
+                      className="aspect-square rounded-lg overflow-hidden cursor-pointer border border-border/50 hover:border-primary/50 transition-all group"
+                      onClick={() => setLightboxImage({ 
+                        src: urlFor(item.image), 
+                        alt: item.title || 'Gallery image' 
+                      })}
+                    >
+                      <img 
+                        src={urlFor(item.image)} 
+                        alt={item.title || 'Gallery image'}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
                     </div>
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious className="left-0" />
-              <CarouselNext className="right-0" />
+              <CarouselPrevious className="hidden sm:flex -left-4" />
+              <CarouselNext className="hidden sm:flex -right-4" />
             </Carousel>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
-              {[1, 2, 3, 4, 5, 6].map((item, index) => (
-                <motion.div
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 max-w-4xl mx-auto">
+              {[1, 2, 3, 4, 5, 6].map((item) => (
+                <div
                   key={item}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.05 }}
-                  className="aspect-square bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg overflow-hidden"
+                  className="aspect-square bg-card/50 border border-border/50 rounded-lg flex items-center justify-center"
                 >
-                  <div className="w-full h-full bg-card/50 flex items-center justify-center">
-                    <span className="text-muted-foreground">Gallery {item}</span>
-                  </div>
-                </motion.div>
+                  <span className="text-muted-foreground text-xs sm:text-sm">Gallery {item}</span>
+                </div>
               ))}
             </div>
           )}
@@ -384,74 +399,63 @@ const Home = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 bg-background relative overflow-hidden">
-        {/* Tech accent lines */}
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary to-transparent opacity-30"></div>
-        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary to-transparent opacity-30"></div>
-        
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+      <section className="py-16 sm:py-20 bg-secondary/20">
+        <div className="container mx-auto px-4 sm:px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-10 sm:mb-12"
+          >
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3">
               Frequently Asked <span className="text-primary">Questions</span>
             </h2>
-            <p className="text-xl text-muted-foreground">Everything you need to know about CUET CAD Society</p>
-          </div>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Everything you need to know about CUET CAD Society
+            </p>
+          </motion.div>
           
-          <div className="max-w-3xl mx-auto">
-            <Accordion type="single" collapsible className="space-y-4">
-              <AccordionItem value="item-1" className="border border-border/50 rounded-lg px-6 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-colors">
-                <AccordionTrigger className="text-lg font-semibold text-foreground hover:text-primary">
-                  What is CUET CAD Society?
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  CUET CAD Society is a student-run organization dedicated to promoting Computer-Aided Design skills among engineering students. We organize workshops, events, and competitions to help students master industry-standard CAD tools and software.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-2" className="border border-border/50 rounded-lg px-6 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-colors">
-                <AccordionTrigger className="text-lg font-semibold text-foreground hover:text-primary">
-                  How can I become a member?
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  Membership is open to all CUET students. You can register through our Events page when we announce new membership drives, typically at the beginning of each semester. Keep an eye on our social media channels for announcements.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-3" className="border border-border/50 rounded-lg px-6 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-colors">
-                <AccordionTrigger className="text-lg font-semibold text-foreground hover:text-primary">
-                  What types of events do you organize?
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  We organize a variety of events including CAD software workshops (AutoCAD, SolidWorks, CATIA), design competitions, guest lectures from industry professionals, project showcases, and networking sessions with alumni working in design and engineering fields.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-4" className="border border-border/50 rounded-lg px-6 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-colors">
-                <AccordionTrigger className="text-lg font-semibold text-foreground hover:text-primary">
-                  Do I need prior CAD experience to join?
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  No prior experience is required! We welcome beginners and offer workshops tailored to different skill levels. Whether you're just starting or looking to advance your skills, our society provides resources and mentorship for everyone.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-5" className="border border-border/50 rounded-lg px-6 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-colors">
-                <AccordionTrigger className="text-lg font-semibold text-foreground hover:text-primary">
-                  Are there any membership fees?
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  We keep membership fees minimal to ensure accessibility for all students. The fee covers event costs, workshop materials, and society activities. Specific fee information is provided during registration periods.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-6" className="border border-border/50 rounded-lg px-6 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-colors">
-                <AccordionTrigger className="text-lg font-semibold text-foreground hover:text-primary">
-                  How can I stay updated with upcoming events?
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  Follow us on our social media platforms and check the Events page regularly. Members also receive email notifications about upcoming workshops, competitions, and special events. Join our community to never miss an opportunity!
-                </AccordionContent>
-              </AccordionItem>
+          <div className="max-w-2xl mx-auto">
+            <Accordion type="single" collapsible className="space-y-3">
+              {[
+                {
+                  q: "What is CUET CAD Society?",
+                  a: "CUET CAD Society is a student-run organization dedicated to promoting Computer-Aided Design skills among engineering students. We organize workshops, events, and competitions to help students master industry-standard CAD tools."
+                },
+                {
+                  q: "How can I become a member?",
+                  a: "Membership is open to all CUET students. You can register through our Events page when we announce new membership drives, typically at the beginning of each semester."
+                },
+                {
+                  q: "What types of events do you organize?",
+                  a: "We organize CAD software workshops (AutoCAD, SolidWorks, CATIA), design competitions, guest lectures from industry professionals, project showcases, and networking sessions with alumni."
+                },
+                {
+                  q: "Do I need prior CAD experience to join?",
+                  a: "No prior experience is required! We welcome beginners and offer workshops tailored to different skill levels. Whether you're just starting or looking to advance, we have resources for everyone."
+                },
+                {
+                  q: "Are there any membership fees?",
+                  a: "We keep membership fees minimal to ensure accessibility. The fee covers event costs, workshop materials, and society activities. Specific fee information is provided during registration."
+                },
+                {
+                  q: "How can I stay updated with upcoming events?",
+                  a: "Follow us on our social media platforms and check the Events page regularly. Members also receive email notifications about upcoming workshops, competitions, and special events."
+                }
+              ].map((faq, index) => (
+                <AccordionItem 
+                  key={index} 
+                  value={`item-${index}`} 
+                  className="border border-border/50 rounded-lg px-4 sm:px-6 bg-card/30 data-[state=open]:border-primary/30"
+                >
+                  <AccordionTrigger className="text-sm sm:text-base font-medium text-foreground hover:text-primary py-4">
+                    {faq.q}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-sm pb-4">
+                    {faq.a}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
             </Accordion>
           </div>
         </div>
