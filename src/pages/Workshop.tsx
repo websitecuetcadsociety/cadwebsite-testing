@@ -66,8 +66,8 @@ const Workshops = () => {
                 className="group overflow-hidden cursor-pointer border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10"
                 onClick={() => handleCardClick(workshop)}
               >
-                {/* Instagram-style square image */}
-                <div className="aspect-square w-full overflow-hidden relative">
+                {/* Facebook cover style image */}
+                <div className="aspect-[820/312] w-full overflow-hidden relative">
                   {workshop.image ? (
                     <img 
                       src={urlFor(workshop.image)} 

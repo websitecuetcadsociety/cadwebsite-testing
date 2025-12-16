@@ -1,9 +1,8 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Event, urlFor } from '@/lib/sanity';
-import { Calendar, MapPin, Clock, ExternalLink, FileText, Tag, CheckCircle, XCircle } from 'lucide-react';
+import { Calendar, MapPin, Clock, ExternalLink, FileText, Tag, CheckCircle, XCircle, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface EventDetailDialogProps {
@@ -20,97 +19,113 @@ const EventDetailDialog = ({ event, open, onOpenChange }: EventDetailDialogProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        {/* Event Image */}
-        {event.image && (
-          <div className="aspect-video w-full overflow-hidden rounded-lg -mt-2 mb-4">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0 bg-background border-border">
+        {/* Hero Image - Facebook Cover Ratio */}
+        <div className="aspect-[820/312] w-full overflow-hidden relative">
+          {event.image ? (
             <img 
               src={urlFor(event.image)} 
               alt={event.title}
               className="w-full h-full object-cover"
             />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary/30 via-background to-secondary/30 flex items-center justify-center">
+              <Users size={64} className="text-muted-foreground/30" />
+            </div>
+          )}
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+          
+          {/* Status badges on image */}
+          <div className="absolute top-4 right-4 flex gap-2">
+            {event.registrationOpen ? (
+              <Badge className="bg-primary text-primary-foreground shadow-lg">
+                <CheckCircle size={12} className="mr-1" />
+                Registration Open
+              </Badge>
+            ) : (
+              <Badge variant="secondary" className="bg-background/90 backdrop-blur-sm">
+                <XCircle size={12} className="mr-1" />
+                Registration Closed
+              </Badge>
+            )}
+            {isPastEvent && (
+              <Badge variant="outline" className="bg-background/90 backdrop-blur-sm border-muted-foreground/30">
+                Past Event
+              </Badge>
+            )}
           </div>
-        )}
+        </div>
 
-        <DialogHeader>
-          <div className="space-y-3">
-            <DialogTitle className="text-2xl md:text-3xl text-foreground font-bold">
-              {event.title}
-            </DialogTitle>
-            <div className="flex gap-2 flex-wrap items-start">
+        {/* Content Section */}
+        <div className="p-6 space-y-6">
+          {/* Header */}
+          <DialogHeader className="space-y-3">
+            <div className="flex items-start gap-3 flex-wrap">
               {event.eventType && (
-                <Badge variant="secondary" className="flex items-center gap-1 text-xs px-2 py-1 whitespace-nowrap">
-                  <Tag size={10} />
+                <Badge variant="secondary" className="flex items-center gap-1.5">
+                  <Tag size={12} />
                   {event.eventType}
                 </Badge>
               )}
-              {event.registrationOpen ? (
-                <Badge className="bg-primary flex items-center gap-1 text-xs px-2 py-1 whitespace-nowrap">
-                  <CheckCircle size={10} />
-                  Open
-                </Badge>
-              ) : (
-                <Badge variant="outline" className="flex items-center gap-1 text-xs px-2 py-1 text-muted-foreground whitespace-nowrap">
-                  <XCircle size={10} />
-                  Closed
-                </Badge>
-              )}
-              {isPastEvent && (
-                <Badge variant="outline" className="text-xs px-2 py-1 text-muted-foreground whitespace-nowrap">Past</Badge>
-              )}
             </div>
-          </div>
-        </DialogHeader>
+            <DialogTitle className="text-2xl md:text-3xl font-bold text-foreground leading-tight">
+              {event.title}
+            </DialogTitle>
+          </DialogHeader>
 
-        <Separator className="my-4" />
-        
-        <div className="space-y-6">
-          {/* Description */}
-          <div>
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">About This Event</h3>
-            <DialogDescription className="text-foreground leading-relaxed text-base">
-              {event.description}
-            </DialogDescription>
-          </div>
-
-          {/* Event Details Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Date & Time Card */}
-            <div className="p-4 rounded-lg bg-muted/50 border border-border space-y-3">
-              <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">Date & Time</h4>
-              <div className="space-y-2">
-                <div className="flex items-center space-x-3 text-sm">
-                  <Calendar size={18} className="text-primary flex-shrink-0" />
-                  <div>
-                    <p className="text-foreground font-medium">
-                      {eventDate.toLocaleDateString('en-US', { 
-                        weekday: 'long', 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                      })}
-                    </p>
-                  </div>
-                </div>
-                {event.time && (
-                  <div className="flex items-center space-x-3 text-sm">
-                    <Clock size={18} className="text-primary flex-shrink-0" />
-                    <span className="text-foreground font-medium">{event.time}</span>
-                  </div>
-                )}
+          {/* Info Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* Date Card */}
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-muted/50 border border-border">
+              <div className="p-2.5 rounded-lg bg-primary/10">
+                <Calendar size={20} className="text-primary" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">Date</p>
+                <p className="text-sm font-semibold text-foreground">
+                  {eventDate.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
+                </p>
               </div>
             </div>
 
-            {/* Venue Card */}
-            {event.venue && (
-              <div className="p-4 rounded-lg bg-muted/50 border border-border space-y-3">
-                <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">Venue</h4>
-                <div className="flex items-start space-x-3 text-sm">
-                  <MapPin size={18} className="text-primary flex-shrink-0 mt-0.5" />
-                  <span className="text-foreground font-medium">{event.venue}</span>
+            {/* Time Card */}
+            {event.time && (
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-muted/50 border border-border">
+                <div className="p-2.5 rounded-lg bg-primary/10">
+                  <Clock size={20} className="text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Time</p>
+                  <p className="text-sm font-semibold text-foreground">{event.time}</p>
                 </div>
               </div>
             )}
+
+            {/* Venue Card */}
+            {event.venue && (
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-muted/50 border border-border">
+                <div className="p-2.5 rounded-lg bg-primary/10">
+                  <MapPin size={20} className="text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Venue</p>
+                  <p className="text-sm font-semibold text-foreground">{event.venue}</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Description */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">About This Event</h3>
+            <DialogDescription className="text-foreground/90 leading-relaxed text-base">
+              {event.description}
+            </DialogDescription>
           </div>
 
           {/* Action Buttons */}
@@ -136,7 +151,7 @@ const EventDetailDialog = ({ event, open, onOpenChange }: EventDetailDialogProps
           {/* Registration Button */}
           {event.registrationOpen && !isPastEvent && (
             <Link to="/register" onClick={() => onOpenChange(false)} className="block">
-              <Button className="w-full text-lg py-6">
+              <Button className="w-full text-lg py-6 font-semibold">
                 Register Now
               </Button>
             </Link>
