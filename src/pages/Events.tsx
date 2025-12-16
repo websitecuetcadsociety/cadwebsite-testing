@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { sanityClient, Event, urlFor } from '@/lib/sanity';
-import { Calendar, MapPin, Clock } from 'lucide-react';
+import { Calendar, MapPin } from 'lucide-react';
 import EventDetailDialog from '@/components/EventDetailDialog';
 
 const Events = () => {
@@ -53,64 +53,68 @@ const Events = () => {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {events.map((event, index) => (
             <motion.div
               key={event._id}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
+              transition={{ delay: index * 0.05 }}
             >
               <Card 
-                className="h-full hover:shadow-xl hover:shadow-primary/10 transition-all group overflow-hidden cursor-pointer"
+                className="group overflow-hidden cursor-pointer border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10"
                 onClick={() => handleCardClick(event)}
               >
-                {event.image && (
-                  <div className="aspect-video w-full overflow-hidden">
+                {/* Instagram-style square image */}
+                <div className="aspect-square w-full overflow-hidden relative">
+                  {event.image ? (
                     <img 
                       src={urlFor(event.image)} 
                       alt={event.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                  </div>
-                )}
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1">
-                      <CardTitle className="text-2xl text-foreground group-hover:text-primary transition-colors mb-2">
-                        {event.title}
-                      </CardTitle>
-                      {event.eventType && (
-                        <Badge variant="secondary" className="mb-2">{event.eventType}</Badge>
-                      )}
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                      <Calendar size={48} className="text-muted-foreground/50" />
                     </div>
+                  )}
+                  {/* Overlay badges */}
+                  <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
+                    {event.eventType && (
+                      <Badge variant="secondary" className="bg-background/90 backdrop-blur-sm text-xs">
+                        {event.eventType}
+                      </Badge>
+                    )}
                     {event.registrationOpen && (
-                      <Badge className="bg-primary">Open</Badge>
+                      <Badge className="bg-primary text-primary-foreground text-xs">Open</Badge>
                     )}
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-muted-foreground leading-relaxed line-clamp-2">{event.description}</p>
+                </div>
+
+                {/* Card content */}
+                <CardContent className="p-4 space-y-3">
+                  <CardTitle className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
+                    {event.title}
+                  </CardTitle>
                   
-                  <div className="space-y-2 pt-2 border-t border-border">
-                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                      <Calendar size={16} className="text-primary flex-shrink-0" />
+                  <p className="text-sm text-muted-foreground line-clamp-2">{event.description}</p>
+                  
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground pt-2 border-t border-border/50">
+                    <div className="flex items-center gap-1.5">
+                      <Calendar size={14} className="text-primary" />
                       <span>{new Date(event.date).toLocaleDateString('en-US', { 
-                        year: 'numeric', 
                         month: 'short', 
                         day: 'numeric' 
                       })}</span>
                     </div>
                     {event.venue && (
-                      <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                        <MapPin size={16} className="text-primary flex-shrink-0" />
-                        <span className="line-clamp-1">{event.venue}</span>
+                      <div className="flex items-center gap-1.5 truncate">
+                        <MapPin size={14} className="text-primary flex-shrink-0" />
+                        <span className="truncate">{event.venue}</span>
                       </div>
                     )}
                   </div>
-
-                  <p className="text-xs text-primary font-medium pt-2">Click for details →</p>
                 </CardContent>
               </Card>
             </motion.div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { sanityClient, Workshop, urlFor } from '@/lib/sanity';
 import { Calendar, User } from 'lucide-react';
@@ -53,61 +53,65 @@ const Workshops = () => {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {workshops.map((workshop, index) => (
             <motion.div
               key={workshop._id}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
+              transition={{ delay: index * 0.05 }}
             >
               <Card 
-                className="h-full hover:shadow-xl hover:shadow-primary/10 transition-all group overflow-hidden cursor-pointer"
+                className="group overflow-hidden cursor-pointer border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10"
                 onClick={() => handleCardClick(workshop)}
               >
-                {workshop.image && (
-                  <div className="aspect-video w-full overflow-hidden">
+                {/* Instagram-style square image */}
+                <div className="aspect-square w-full overflow-hidden relative">
+                  {workshop.image ? (
                     <img 
                       src={urlFor(workshop.image)} 
                       alt={workshop.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                  </div>
-                )}
-                <CardHeader>
-                  <div className="space-y-2">
-                    <CardTitle className="text-2xl text-foreground group-hover:text-primary transition-colors">{workshop.title}</CardTitle>
-                    {workshop.duration && (
-                      <Badge variant="secondary">{workshop.duration}</Badge>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-muted-foreground leading-relaxed line-clamp-2">{workshop.description}</p>
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                      <User size={48} className="text-muted-foreground/50" />
+                    </div>
+                  )}
+                  {/* Overlay badge */}
+                  {workshop.duration && (
+                    <div className="absolute top-3 left-3">
+                      <Badge variant="secondary" className="bg-background/90 backdrop-blur-sm text-xs">
+                        {workshop.duration}
+                      </Badge>
+                    </div>
+                  )}
+                </div>
+
+                {/* Card content */}
+                <CardContent className="p-4 space-y-3">
+                  <CardTitle className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
+                    {workshop.title}
+                  </CardTitle>
                   
-                  <div className="space-y-2 pt-4 border-t border-border">
+                  <p className="text-sm text-muted-foreground line-clamp-2">{workshop.description}</p>
+                  
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground pt-2 border-t border-border/50">
+                    <div className="flex items-center gap-1.5">
+                      <Calendar size={14} className="text-primary" />
+                      <span>{new Date(workshop.date).toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric' 
+                      })}</span>
+                    </div>
                     {workshop.instructor && (
-                      <div className="flex items-center space-x-2 text-sm">
-                        <User size={16} className="text-primary flex-shrink-0" />
-                        <span className="text-muted-foreground">Instructor:</span>
-                        <span className="text-foreground font-medium">{workshop.instructor}</span>
+                      <div className="flex items-center gap-1.5 truncate">
+                        <User size={14} className="text-primary flex-shrink-0" />
+                        <span className="truncate">{workshop.instructor}</span>
                       </div>
                     )}
-                    <div className="flex items-center space-x-2 text-sm">
-                      <Calendar size={16} className="text-primary flex-shrink-0" />
-                      <span className="text-muted-foreground">Date:</span>
-                      <span className="text-foreground font-medium">
-                        {new Date(workshop.date).toLocaleDateString('en-US', { 
-                          year: 'numeric', 
-                          month: 'short', 
-                          day: 'numeric' 
-                        })}
-                      </span>
-                    </div>
                   </div>
-
-                  <p className="text-xs text-primary font-medium pt-2">Click for details →</p>
                 </CardContent>
               </Card>
             </motion.div>
