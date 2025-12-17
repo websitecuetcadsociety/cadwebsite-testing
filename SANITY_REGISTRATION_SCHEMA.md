@@ -1,206 +1,149 @@
-# Sanity Schema for Registration System
+# Sanity Registration Configuration Schema
 
-## Add this schema to your Sanity Studio project
+This document explains how to set up the registration configuration in your Sanity CMS to enable the simplified Google Form-based registration system.
 
-### Step 1: Create the schema file
+## Sanity Schema Definition
 
-Create a new file: `schemas/registrationConfig.ts`
+Add this schema to your Sanity project to create the registration configuration document type:
 
 ```typescript
+// schemas/registrationConfig.ts
 import { defineType, defineField } from 'sanity';
 
 export default defineType({
   name: 'registrationConfig',
   title: 'Registration Configuration',
   type: 'document',
-  icon: () => '⚙️',
+  icon: () => '📝',
   fields: [
     defineField({
-      name: 'title',
-      title: 'Configuration Title',
-      type: 'string',
-      description: 'Internal name for this configuration (e.g., "Main Registration Config")',
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: 'sheetId',
-      title: 'Google Sheet ID',
-      type: 'string',
-      description: 'The ID of your Google Sheet (from the URL)',
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: 'memberDriveFolderId',
-      title: 'Member Photos Drive Folder ID',
-      type: 'string',
-      description: 'Google Drive folder ID for member registration photos',
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: 'eventDriveFolderId',
-      title: 'Event Photos Drive Folder ID',
-      type: 'string',
-      description: 'Google Drive folder ID for event registration photos',
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: 'workshopDriveFolderId',
-      title: 'Workshop Photos Drive Folder ID',
-      type: 'string',
-      description: 'Google Drive folder ID for workshop registration photos',
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: 'scriptUrl',
-      title: 'Google Apps Script URL',
+      name: 'googleFormUrl',
+      title: 'Google Form URL',
       type: 'url',
-      description: 'The Web App URL from your deployed Google Apps Script',
-      validation: (Rule) => Rule.required().uri({
-        scheme: ['https']
-      }),
+      description: 'The URL of your Google Form (e.g., https://docs.google.com/forms/d/e/YOUR_FORM_ID/viewform)',
+      validation: (Rule) => Rule.required().error('Google Form URL is required'),
     }),
     defineField({
-      name: 'registrationOpen',
-      title: 'Registration Open (Global)',
-      type: 'boolean',
-      description: 'Master switch to enable/disable ALL registrations',
-      initialValue: false,
+      name: 'registrationStartDate',
+      title: 'Registration Start Date',
+      type: 'datetime',
+      description: 'Registration will open on this date',
+      validation: (Rule) => Rule.required().error('Start date is required'),
     }),
     defineField({
-      name: 'memberRegistrationOpen',
-      title: 'Member Registration Open',
-      type: 'boolean',
-      description: 'Enable/disable member registrations specifically',
-      initialValue: true,
+      name: 'registrationEndDate',
+      title: 'Registration End Date',
+      type: 'datetime',
+      description: 'Registration will close after this date',
+      validation: (Rule) => Rule.required().error('End date is required'),
     }),
     defineField({
-      name: 'eventRegistrationOpen',
-      title: 'Event Registration Open',
-      type: 'boolean',
-      description: 'Enable/disable event registrations specifically',
-      initialValue: true,
-    }),
-    defineField({
-      name: 'workshopRegistrationOpen',
-      title: 'Workshop Registration Open',
-      type: 'boolean',
-      description: 'Enable/disable workshop registrations specifically',
-      initialValue: true,
-    }),
-    defineField({
-      name: 'notificationEmail',
-      title: 'Admin Notification Email',
+      name: 'registrationTitle',
+      title: 'Registration Title',
       type: 'string',
-      description: 'Email address to receive registration notifications (optional)',
+      description: 'Title displayed on the registration page (optional)',
+      initialValue: 'Register Now',
+    }),
+    defineField({
+      name: 'registrationDescription',
+      title: 'Registration Description',
+      type: 'text',
+      description: 'Description displayed below the title (optional)',
     }),
   ],
   preview: {
     select: {
-      title: 'title',
-      registrationOpen: 'registrationOpen',
+      startDate: 'registrationStartDate',
+      endDate: 'registrationEndDate',
     },
-    prepare(selection) {
-      const { title, registrationOpen } = selection;
+    prepare({ startDate, endDate }: { startDate: string; endDate: string }) {
+      const now = new Date();
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+
+      let status = 'Closed';
+      if (now >= start && now <= end) {
+        status = '🟢 Open';
+      } else if (now < start) {
+        status = '🟡 Upcoming';
+      } else {
+        status = '🔴 Ended';
+      }
+
       return {
-        title: title,
-        subtitle: registrationOpen ? '✅ Registrations Open' : '❌ Registrations Closed',
+        title: 'Registration Configuration',
+        subtitle: `Status: ${status}`,
       };
     },
   },
 });
 ```
 
-### Step 2: Update schemas index file
+## Integrating the Schema
 
-Open `schemas/index.ts` and add the import:
+1. Add the schema file to your Sanity project's `schemas` folder
+2. Import and add it to your `schemas/index.ts`:
 
 ```typescript
 import registrationConfig from './registrationConfig';
 
 export const schemaTypes = [
-  // ... your existing schemas
+  // ... other schemas
   registrationConfig,
 ];
 ```
 
-### Step 3: Deploy to Sanity Studio
+3. Deploy your Sanity Studio:
+```bash
+npx sanity deploy
+```
 
-1. Save the files
-2. If running locally: `npm run dev` or `sanity dev`
-3. If using Sanity hosted studio: deploy with `sanity deploy`
-
-### Step 4: Create the configuration document
+## Creating the Configuration Document
 
 1. Open your Sanity Studio
-2. Look for "Registration Configuration" in the sidebar
-3. Click "Create" to add a new document
-4. Fill in all the required fields:
-   - Configuration Title: "Main Registration Config"
-   - Google Sheet ID: (from your Google Sheet URL)
-   - All three Drive Folder IDs
-   - Google Apps Script URL
-   - Toggle switches for registration open/close
-5. Click "Publish"
+2. Create a new **Registration Configuration** document
+3. Fill in the required fields:
+   - **Google Form URL**: Paste your Google Form link
+   - **Registration Start Date**: Select when registration should open
+   - **Registration End Date**: Select when registration should close
+   - **Registration Title** (optional): Custom title for the page
+   - **Registration Description** (optional): Custom description
+4. **Publish** the document
 
-### Step 5: Important Notes
+## How It Works
 
-**There should only be ONE registration configuration document.**
-- The frontend fetches the first (and only) configuration
-- Multiple configs are not supported in the current implementation
-- If you need to change settings, edit the existing document
+The registration page will:
+1. Fetch the configuration from Sanity
+2. Check if the current date is within the registration period
+3. If **within the period**: Display the embedded Google Form
+4. If **before the start date**: Show "Registration Not Yet Open" with the opening date
+5. If **after the end date**: Show "Registration Closed" message
 
-**Making the configuration active:**
-- After creating the document, make sure to click "Publish"
-- Unpublished drafts will not be visible to the frontend
-- Changes take effect immediately after publishing
+## Google Form Setup Tips
 
-### Step 6: Usage in Frontend
+1. Create your Google Form at [Google Forms](https://forms.google.com)
+2. Add all the fields you need for registration
+3. Copy the form URL (should look like `https://docs.google.com/forms/d/e/FORM_ID/viewform`)
+4. Paste this URL in the Sanity configuration
 
-The frontend automatically fetches this configuration on page load:
+### Recommended Form Fields
+- Full Name
+- Email Address
+- Department
+- Academic Year/Batch
+- Mobile Number
+- Social Media Links (LinkedIn, Facebook)
+- Payment Information (if applicable)
+- Photo Upload (Google Forms supports file uploads)
 
-```typescript
-const data = await sanityClient.fetch('*[_type == "registrationConfig"][0]');
-```
+## Troubleshooting
 
-This returns:
-```json
-{
-  "sheetId": "your-sheet-id",
-  "memberDriveFolderId": "member-folder-id",
-  "eventDriveFolderId": "event-folder-id",
-  "workshopDriveFolderId": "workshop-folder-id",
-  "scriptUrl": "https://script.google.com/...",
-  "registrationOpen": true,
-  "memberRegistrationOpen": true,
-  "eventRegistrationOpen": false,
-  "workshopRegistrationOpen": true
-}
-```
+### Form not showing?
+- Make sure the Google Form URL is correct
+- Ensure the form is set to "Anyone with the link can respond"
+- Check that the registration dates are set correctly
 
-### Advanced: Adding More Registration Types
-
-To add a new type (e.g., "competition"):
-
-1. **Add field to schema:**
-```typescript
-defineField({
-  name: 'competitionDriveFolderId',
-  title: 'Competition Photos Drive Folder ID',
-  type: 'string',
-  description: 'Google Drive folder ID for competition registration photos',
-  validation: (Rule) => Rule.required(),
-}),
-defineField({
-  name: 'competitionRegistrationOpen',
-  title: 'Competition Registration Open',
-  type: 'boolean',
-  description: 'Enable/disable competition registrations',
-  initialValue: true,
-}),
-```
-
-2. **Update Google Apps Script** with new folder ID and case handling
-
-3. **Update Frontend** registration type dropdown and logic
-
-4. **Create new sheet tab** in Google Sheets named "Competitions"
+### Registration showing as closed?
+- Verify the start and end dates in Sanity
+- Make sure you've published the configuration document
+- Check that your device's date/time is correct

@@ -1,49 +1,83 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
 import { sanityClient } from '@/lib/sanity';
-import { Loader2, Upload, CheckCircle, XCircle } from 'lucide-react';
+import { Loader2, XCircle, CalendarX, Clock } from 'lucide-react';
 
 interface RegistrationConfig {
   _id: string;
-  sheetId: string;
-  memberDriveFolderId: string;
-  eventDriveFolderId: string;
-  workshopDriveFolderId: string;
-  scriptUrl: string;
-  registrationOpen: boolean;
-  memberRegistrationOpen?: boolean;
-  eventRegistrationOpen?: boolean;
-  workshopRegistrationOpen?: boolean;
+  googleFormUrl: string;
+  registrationStartDate: string;
+  registrationEndDate: string;
+  registrationTitle?: string;
+  registrationDescription?: string;
 }
+
+interface TimeLeft {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
+const CountdownTimer = ({ targetDate, label }: { targetDate: Date; label: string }) => {
+  const calculateTimeLeft = useCallback((): TimeLeft => {
+    const difference = targetDate.getTime() - new Date().getTime();
+    
+    if (difference <= 0) {
+      return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+    }
+
+    return {
+      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+      hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+      minutes: Math.floor((difference / 1000 / 60) % 60),
+      seconds: Math.floor((difference / 1000) % 60),
+    };
+  }, [targetDate]);
+
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>(calculateTimeLeft);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(calculateTimeLeft());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [calculateTimeLeft]);
+
+  const timeUnits = [
+    { label: 'Days', value: timeLeft.days },
+    { label: 'Hours', value: timeLeft.hours },
+    { label: 'Minutes', value: timeLeft.minutes },
+    { label: 'Seconds', value: timeLeft.seconds },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground text-center">{label}</p>
+      <div className="grid grid-cols-4 gap-2 md:gap-4">
+        {timeUnits.map((unit) => (
+          <div
+            key={unit.label}
+            className="bg-primary/10 border border-primary/20 rounded-lg p-2 md:p-4 text-center"
+          >
+            <div className="text-2xl md:text-4xl font-bold text-primary tabular-nums">
+              {String(unit.value).padStart(2, '0')}
+            </div>
+            <div className="text-xs md:text-sm text-muted-foreground mt-1">
+              {unit.label}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const EventRegistration = () => {
   const [config, setConfig] = useState<RegistrationConfig | null>(null);
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const { toast } = useToast();
-
-  // Form state
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    department: '',
-    year: '',
-    registrationType: '',
-    batchNo: '',
-    mobileNo: '',
-    linkedinId: '',
-    facebookId: '',
-    paymentMethod: '',
-    transactionId: '',
-  });
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
 
   useEffect(() => {
     fetchConfig();
@@ -63,195 +97,44 @@ const EventRegistration = () => {
       setConfig(data);
     } catch (error) {
       console.error('Error fetching config:', error);
-      toast({
-        title: "Configuration Error",
-        description: "Unable to load registration settings.",
-        variant: "destructive",
-      });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "File too large",
-          description: "Please select an image smaller than 5MB.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Invalid file type",
-          description: "Please select a valid image file.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setImageFile(file);
-      
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const isRegistrationOpen = () => {
-    if (!config) return false;
+    if (!config?.registrationStartDate || !config?.registrationEndDate) return false;
     
-    // Check specific type if selected
-    if (formData.registrationType === 'member' && config.memberRegistrationOpen !== undefined) {
-      return config.memberRegistrationOpen;
-    }
-    if (formData.registrationType === 'event' && config.eventRegistrationOpen !== undefined) {
-      return config.eventRegistrationOpen;
-    }
-    if (formData.registrationType === 'workshop' && config.workshopRegistrationOpen !== undefined) {
-      return config.workshopRegistrationOpen;
-    }
+    const now = new Date();
+    const startDate = new Date(config.registrationStartDate);
+    const endDate = new Date(config.registrationEndDate);
     
-    // Fallback to global registration flag
-    return config.registrationOpen;
+    endDate.setHours(23, 59, 59, 999);
+    
+    return now >= startDate && now <= endDate;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const getFormEmbedUrl = () => {
+    if (!config?.googleFormUrl) return '';
     
-    if (!config || !config.scriptUrl) {
-      toast({
-        title: "Configuration Error",
-        description: "Registration system is not properly configured.",
-        variant: "destructive",
-      });
-      return;
+    let url = config.googleFormUrl;
+    
+    if (url.includes('/viewform')) {
+      url = url.replace('/viewform', '/viewform?embedded=true');
+    } else if (!url.includes('embedded=true')) {
+      url = url + (url.includes('?') ? '&' : '?') + 'embedded=true';
     }
+    
+    return url;
+  };
 
-    if (!isRegistrationOpen()) {
-      toast({
-        title: "Registration Closed",
-        description: "Registration for this type is currently closed.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!imageFile) {
-      toast({
-        title: "Image Required",
-        description: "Please upload your photo.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setSubmitting(true);
-
-    try {
-      // Convert image to base64
-      const reader = new FileReader();
-      reader.readAsDataURL(imageFile);
-      
-      reader.onload = async () => {
-        const base64Image = reader.result as string;
-        
-        // Select the appropriate folder ID based on registration type
-        let driveFolderId = '';
-        switch(formData.registrationType) {
-          case 'member':
-            driveFolderId = config.memberDriveFolderId;
-            break;
-          case 'event':
-            driveFolderId = config.eventDriveFolderId;
-            break;
-          case 'workshop':
-            driveFolderId = config.workshopDriveFolderId;
-            break;
-        }
-        
-        // Prepare form data for Google Apps Script
-        const payload = {
-          name: formData.name.trim(),
-          email: formData.email.trim(),
-          department: formData.department.trim(),
-          year: formData.year.trim(),
-          registrationType: formData.registrationType,
-          batchNo: formData.batchNo.trim(),
-          mobileNo: formData.mobileNo.trim(),
-          linkedinId: formData.linkedinId.trim(),
-          facebookId: formData.facebookId.trim(),
-          paymentMethod: formData.paymentMethod,
-          transactionId: formData.transactionId.trim(),
-          image: base64Image,
-          imageFileName: imageFile.name,
-          sheetId: config.sheetId,
-          driveFolderId: driveFolderId,
-        };
-
-        // Submit to Google Apps Script
-        const response = await fetch(config.scriptUrl, {
-          method: 'POST',
-          mode: 'no-cors', // Google Apps Script requires this
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        });
-
-        // Note: no-cors mode means we can't read the response
-        // We assume success if no error was thrown
-        toast({
-          title: "Registration Successful!",
-          description: "Your registration has been submitted successfully.",
-        });
-
-        // Reset form
-        setFormData({
-          name: '',
-          email: '',
-          department: '',
-          year: '',
-          registrationType: '',
-          batchNo: '',
-          mobileNo: '',
-          linkedinId: '',
-          facebookId: '',
-          paymentMethod: '',
-          transactionId: '',
-        });
-        setImageFile(null);
-        setImagePreview('');
-        
-        // Reset file input
-        const fileInput = document.getElementById('image-upload') as HTMLInputElement;
-        if (fileInput) fileInput.value = '';
-        
-      };
-
-      reader.onerror = () => {
-        throw new Error('Failed to read image file');
-      };
-
-    } catch (error) {
-      console.error('Submission error:', error);
-      toast({
-        title: "Submission Failed",
-        description: "There was an error submitting your registration. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setSubmitting(false);
-    }
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
   };
 
   if (loading) {
@@ -262,7 +145,7 @@ const EventRegistration = () => {
     );
   }
 
-  if (!config) {
+  if (!config || !config.googleFormUrl) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="max-w-md w-full">
@@ -280,258 +163,111 @@ const EventRegistration = () => {
     );
   }
 
+  // Registration is closed
+  if (!isRegistrationOpen()) {
+    const now = new Date();
+    const startDate = new Date(config.registrationStartDate);
+    const endDate = new Date(config.registrationEndDate);
+    const isUpcoming = now < startDate;
+
+    return (
+      <div className="min-h-screen py-20 px-4">
+        <div className="container mx-auto max-w-2xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Card className="shadow-lg border-destructive/20">
+              <CardHeader className="text-center space-y-4">
+                <div className="mx-auto w-20 h-20 rounded-full bg-destructive/10 flex items-center justify-center">
+                  <CalendarX className="w-10 h-10 text-destructive" />
+                </div>
+                <CardTitle className="text-3xl">
+                  {isUpcoming ? 'Registration Not Yet Open' : 'Registration Closed'}
+                </CardTitle>
+                <CardDescription className="text-lg">
+                  {isUpcoming 
+                    ? 'Registration will open soon. Please check back later.'
+                    : 'The registration period has ended. Thank you for your interest!'
+                  }
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {isUpcoming && (
+                  <CountdownTimer 
+                    targetDate={startDate} 
+                    label="Registration opens in:" 
+                  />
+                )}
+                
+                <div className="bg-muted/50 rounded-lg p-6 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Clock className="w-5 h-5 text-primary" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Registration Period</p>
+                      <p className="font-medium">
+                        {formatDate(config.registrationStartDate)} - {formatDate(config.registrationEndDate)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
+  // Registration is open - show embedded form
+  const endDate = new Date(config.registrationEndDate);
+  endDate.setHours(23, 59, 59, 999);
+
   return (
     <div className="min-h-screen py-20 px-4">
-      <div className="container mx-auto max-w-2xl">
+      <div className="container mx-auto max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
+          className="space-y-6"
         >
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-3xl text-center">Register Now</CardTitle>
-              <CardDescription className="text-center">
-                Join CUET CAD Society - Register for membership, events, or workshops
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Registration Type */}
-                <div className="space-y-2">
-                  <Label htmlFor="registrationType">Registration Type *</Label>
-                  <Select
-                    value={formData.registrationType}
-                    onValueChange={(value) => setFormData({ ...formData, registrationType: value })}
-                    required
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select registration type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="member">Member Registration</SelectItem>
-                      <SelectItem value="event">Event Registration</SelectItem>
-                      <SelectItem value="workshop">Workshop Registration</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+          {/* Header */}
+          <div className="text-center space-y-4">
+            <h1 className="text-3xl md:text-4xl font-bold">
+              {config.registrationTitle || 'Register Now'}
+            </h1>
+            {config.registrationDescription && (
+              <p className="text-muted-foreground text-lg">
+                {config.registrationDescription}
+              </p>
+            )}
+            
+            {/* Countdown Timer */}
+            <div className="max-w-md mx-auto pt-4">
+              <CountdownTimer 
+                targetDate={endDate} 
+                label="Registration closes in:" 
+              />
+            </div>
+          </div>
 
-                {/* Name */}
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name *</Label>
-                  <Input
-                    id="name"
-                    type="text"
-                    placeholder="Enter your full name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                    maxLength={100}
-                  />
-                </div>
-
-                {/* Email */}
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="your.email@example.com"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    required
-                    maxLength={255}
-                  />
-                </div>
-
-                {/* Department */}
-                <div className="space-y-2">
-                  <Label htmlFor="department">Department *</Label>
-                  <Input
-                    id="department"
-                    type="text"
-                    placeholder="e.g., Computer Science & Engineering"
-                    value={formData.department}
-                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                    required
-                    maxLength={100}
-                  />
-                </div>
-
-                {/* Year */}
-                <div className="space-y-2">
-                  <Label htmlFor="year">Academic Year *</Label>
-                  <Select
-                    value={formData.year}
-                    onValueChange={(value) => setFormData({ ...formData, year: value })}
-                    required
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select your year" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1st">1st Year</SelectItem>
-                      <SelectItem value="2nd">2nd Year</SelectItem>
-                      <SelectItem value="3rd">3rd Year</SelectItem>
-                      <SelectItem value="4th">4th Year</SelectItem>
-                      <SelectItem value="graduate">Graduate</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Batch No */}
-                <div className="space-y-2">
-                  <Label htmlFor="batchNo">Batch Number *</Label>
-                  <Input
-                    id="batchNo"
-                    type="text"
-                    placeholder="e.g., 2024"
-                    value={formData.batchNo}
-                    onChange={(e) => setFormData({ ...formData, batchNo: e.target.value })}
-                    required
-                    maxLength={10}
-                  />
-                </div>
-
-                {/* Mobile No */}
-                <div className="space-y-2">
-                  <Label htmlFor="mobileNo">Mobile Number *</Label>
-                  <Input
-                    id="mobileNo"
-                    type="tel"
-                    placeholder="e.g., +8801XXXXXXXXX"
-                    value={formData.mobileNo}
-                    onChange={(e) => setFormData({ ...formData, mobileNo: e.target.value })}
-                    required
-                    maxLength={20}
-                  />
-                </div>
-
-                {/* LinkedIn ID */}
-                <div className="space-y-2">
-                  <Label htmlFor="linkedinId">LinkedIn Profile URL</Label>
-                  <Input
-                    id="linkedinId"
-                    type="url"
-                    placeholder="https://linkedin.com/in/yourprofile"
-                    value={formData.linkedinId}
-                    onChange={(e) => setFormData({ ...formData, linkedinId: e.target.value })}
-                    maxLength={255}
-                  />
-                </div>
-
-                {/* Facebook ID */}
-                <div className="space-y-2">
-                  <Label htmlFor="facebookId">Facebook Profile URL</Label>
-                  <Input
-                    id="facebookId"
-                    type="url"
-                    placeholder="https://facebook.com/yourprofile"
-                    value={formData.facebookId}
-                    onChange={(e) => setFormData({ ...formData, facebookId: e.target.value })}
-                    maxLength={255}
-                  />
-                </div>
-
-                {/* Payment Method */}
-                <div className="space-y-2">
-                  <Label htmlFor="paymentMethod">Payment Method *</Label>
-                  <Select
-                    value={formData.paymentMethod}
-                    onValueChange={(value) => setFormData({ ...formData, paymentMethod: value })}
-                    required
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select payment method" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="bkash">bKash</SelectItem>
-                      <SelectItem value="nagad">Nagad</SelectItem>
-                      <SelectItem value="rocket">Rocket</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Transaction ID */}
-                <div className="space-y-2">
-                  <Label htmlFor="transactionId">Transaction ID *</Label>
-                  <Input
-                    id="transactionId"
-                    type="text"
-                    placeholder="Enter your transaction ID"
-                    value={formData.transactionId}
-                    onChange={(e) => setFormData({ ...formData, transactionId: e.target.value })}
-                    required
-                    maxLength={50}
-                  />
-                </div>
-
-                {/* Image Upload */}
-                <div className="space-y-2">
-                  <Label htmlFor="image-upload">Upload Your Photo *</Label>
-                  <div className="flex flex-col items-center gap-4">
-                    {imagePreview && (
-                      <div className="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-primary">
-                        <img
-                          src={imagePreview}
-                          alt="Preview"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    <div className="flex items-center gap-2 w-full">
-                      <Input
-                        id="image-upload"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="cursor-pointer"
-                        required
-                      />
-                      <Upload className="text-muted-foreground" size={20} />
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Max file size: 5MB. Supported formats: JPG, PNG, WEBP
-                    </p>
-                  </div>
-                </div>
-
-                {/* Status Message */}
-                {!isRegistrationOpen() && formData.registrationType && (
-                  <div className="p-4 bg-destructive/10 border border-destructive rounded-lg">
-                    <p className="text-sm text-destructive font-medium flex items-center gap-2">
-                      <XCircle size={16} />
-                      Registration is currently closed for {formData.registrationType}s
-                    </p>
-                  </div>
-                )}
-
-                {isRegistrationOpen() && formData.registrationType && (
-                  <div className="p-4 bg-primary/10 border border-primary rounded-lg">
-                    <p className="text-sm text-primary font-medium flex items-center gap-2">
-                      <CheckCircle size={16} />
-                      Registration is open for {formData.registrationType}s
-                    </p>
-                  </div>
-                )}
-
-                {/* Submit Button */}
-                <Button
-                  type="submit"
-                  className="w-full"
-                  size="lg"
-                  disabled={submitting || !isRegistrationOpen()}
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Submitting...
-                    </>
-                  ) : (
-                    'Submit Registration'
-                  )}
-                </Button>
-              </form>
+          {/* Embedded Google Form */}
+          <Card className="shadow-lg overflow-hidden">
+            <CardContent className="p-0">
+              <iframe
+                src={getFormEmbedUrl()}
+                width="100%"
+                height="800"
+                frameBorder="0"
+                marginHeight={0}
+                marginWidth={0}
+                className="min-h-[600px] md:min-h-[800px]"
+                title="Registration Form"
+              >
+                Loading…
+              </iframe>
             </CardContent>
           </Card>
         </motion.div>
