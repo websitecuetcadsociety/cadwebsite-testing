@@ -44,7 +44,7 @@ const Navbar = () => {
               </Link>
             ))}
             <a 
-              href="mailto:sponsor@cuetcad.org?subject=Sponsorship Inquiry"
+              href="mailto:cuetcadsociety@gmail.com?subject=Sponsorship Inquiry"
               className="ml-2"
             >
               <Button 
@@ -89,7 +89,7 @@ const Navbar = () => {
                   </Link>
                 ))}
                 <a 
-                  href="mailto:sponsor@cuetcad.org?subject=Sponsorship Inquiry"
+                  href="mailto:cuetcadsociety@gmail.com?subject=Sponsorship Inquiry"
                   className="block px-4 py-3"
                 >
                   <Button 
