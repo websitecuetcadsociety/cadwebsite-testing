@@ -72,24 +72,18 @@ const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-start space-x-2 text-muted-foreground text-sm">
                 <MapPin size={16} className="mt-1 flex-shrink-0" />
-                <span>CUET Campus, Chittagong, Bangladesh</span>
+                <span>Pahartali, Raozan,  Chittagong, Bangladesh</span>
               </li>
               <li className="flex items-center space-x-2 text-muted-foreground text-sm">
                 <Mail size={16} />
-                <span>contact@cuetcad.org</span>
+                <span>cuetcadsociety@gmail.com</span>
               </li>
             </ul>
             <div className="flex space-x-4 mt-4">
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="https://www.facebook.com/cadsocietycuet" className="text-muted-foreground hover:text-primary transition-colors">
                 <Facebook size={20} />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Twitter size={20} />
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Instagram size={20} />
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="https://www.linkedin.com/company/cuet-cad-society" className="text-muted-foreground hover:text-primary transition-colors">
                 <Linkedin size={20} />
               </a>
             </div>
