@@ -65,7 +65,7 @@ const RecentActivities = () => {
             date: a.date,
             image: a.image,
             type: 'activity' as const,
-            link: '/events',
+            link: '/activities',
           })),
         ];
 

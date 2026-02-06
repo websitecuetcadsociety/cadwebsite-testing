@@ -11,6 +11,7 @@ import Workshop from "./pages/Workshop";
 import Committee from "./pages/Committee";
 import Alumni from "./pages/Alumni";
 import Members from "./pages/Members";
+import Activities from "./pages/Activities";
 import EventRegistration from "./pages/EventRegistration";
 import NotFound from "./pages/NotFound";
 
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/committee" element={<Committee />} />
             <Route path="/alumni" element={<Alumni />} />
             <Route path="/members" element={<Members />} />
+            <Route path="/activities" element={<Activities />} />
             <Route path="/register" element={<EventRegistration />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
