@@ -107,3 +107,12 @@ export interface Member {
   email?: string;
   image?: any;
 }
+
+export interface Announcement {
+  _id: string;
+  title: string;
+  message: string;
+  link?: string;
+  type?: 'info' | 'event' | 'workshop' | 'urgent';
+  isActive?: boolean;
+}

@@ -2,18 +2,19 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { sanityClient, Message, Activity, MediaItem, urlFor } from '@/lib/sanity';
-import { Calendar, Users, Award, ArrowRight, Quote, Sparkles, ChevronRight } from 'lucide-react';
+import { sanityClient, Message, MediaItem, urlFor } from '@/lib/sanity';
+import { Calendar, Users, Award, ArrowRight, Quote, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import ImageLightbox from '@/components/ImageLightbox';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import cadLogo from '../assets/cad-logo.png';
 import { useIsMobile } from '@/hooks/use-mobile';
+import AnnouncementBanner from '@/components/AnnouncementBanner';
+import RecentActivities from '@/components/RecentActivities';
 
 const Home = () => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [activities, setActivities] = useState<Activity[]>([]);
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null);
   const isMobile = useIsMobile();
@@ -29,13 +30,11 @@ const Home = () => {
           return;
         }
 
-        const [messagesData, activitiesData, mediaData] = await Promise.all([
+        const [messagesData, mediaData] = await Promise.all([
           sanityClient.fetch('*[_type == "message"] | order(_createdAt desc)'),
-          sanityClient.fetch('*[_type == "activity"] | order(date desc)[0...4]'),
           sanityClient.fetch('*[_type == "mediaItem"] | order(_createdAt desc)[0...6]'),
         ]);
         setMessages(messagesData);
-        setActivities(activitiesData);
         setMediaItems(mediaData);
       } catch (error) {
         console.error('❌ Sanity fetch error:', error);
@@ -53,6 +52,9 @@ const Home = () => {
 
   return (
     <div className="min-h-screen overflow-x-hidden">
+      {/* Announcement Banner */}
+      <AnnouncementBanner />
+
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center">
         {/* Background layers */}
@@ -270,77 +272,8 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Recent Activities */}
-      <section className="py-16 sm:py-20 bg-secondary/20 relative">
-        <div className="container mx-auto px-4 sm:px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10 sm:mb-12"
-          >
-            <div>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2">
-                Recent <span className="text-primary">Activities</span>
-              </h2>
-              <p className="text-sm sm:text-base text-muted-foreground">
-                Stay updated with our latest events and workshops
-              </p>
-            </div>
-            <Link to="/events" className="hidden sm:block">
-              <Button variant="ghost" className="text-primary hover:text-primary/80 group">
-                View All
-                <ChevronRight className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-          </motion.div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-            {activities.map((activity, index) => (
-              <Link key={activity._id} to="/events">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Card className="group cursor-pointer bg-card/50 border-border/50 hover:border-primary/30 transition-all overflow-hidden">
-                    {activity.image && (
-                      <div className="aspect-video relative overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-t from-card/90 to-transparent z-10" />
-                        <img 
-                          src={urlFor(activity.image)} 
-                          alt={activity.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                        <div className="absolute bottom-3 left-3 z-20">
-                          <span className="px-2 py-1 bg-primary/90 text-primary-foreground text-xs font-medium rounded">
-                            {new Date(activity.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                    <CardContent className="p-4 sm:p-5">
-                      <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors mb-2 text-sm sm:text-base">
-                        {activity.title}
-                      </h3>
-                      <p className="text-muted-foreground text-xs sm:text-sm line-clamp-2">
-                        {activity.description}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              </Link>
-            ))}
-          </div>
-
-          <div className="mt-6 text-center sm:hidden">
-            <Link to="/events">
-              <Button className="w-full">View All Events</Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* Recent Activities - Auto-fetches from events, workshops, activities */}
+      <RecentActivities />
 
       {/* Media Gallery */}
       <section className="py-16 sm:py-20 bg-background">
