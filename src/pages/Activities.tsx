@@ -4,6 +4,16 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { sanityClient, Activity, urlFor } from '@/lib/sanity';
 import { Calendar, MapPin, Sparkles, Trophy, Users, GraduationCap, Compass, Star } from 'lucide-react';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
+
+const ITEMS_PER_PAGE = 10;
 
 const categoryConfig: Record<string, { label: string; icon: typeof Trophy; color: string }> = {
   competition: { label: 'Competition', icon: Trophy, color: 'bg-amber-500/10 text-amber-500 border-amber-500/30' },
@@ -25,6 +35,7 @@ const Activities = () => {
   const [activities, setActivities] = useState<ExtendedActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const fetchActivities = async () => {
@@ -49,11 +60,26 @@ const Activities = () => {
     fetchActivities();
   }, []);
 
+  // Reset page when category changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory]);
+
   const filteredActivities = selectedCategory
     ? activities.filter((a) => a.category === selectedCategory)
     : activities;
 
   const categories = [...new Set(activities.map((a) => a.category).filter(Boolean))];
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredActivities.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedActivities = filteredActivities.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   if (loading) {
     return (
@@ -132,80 +158,115 @@ const Activities = () => {
       {/* Activities Grid */}
       <section className="py-12 sm:py-16">
         <div className="container mx-auto px-4 sm:px-6">
-          {filteredActivities.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredActivities.map((activity, index) => {
-                const config = categoryConfig[activity.category || 'other'];
-                const CategoryIcon = config?.icon || Sparkles;
+          {paginatedActivities.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {paginatedActivities.map((activity, index) => {
+                  const config = categoryConfig[activity.category || 'other'];
+                  const CategoryIcon = config?.icon || Sparkles;
 
-                return (
-                  <motion.div
-                    key={activity._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <Card className="group h-full bg-card/50 border-border/50 hover:border-primary/30 transition-all overflow-hidden">
-                      {activity.image && (
-                        <div className="aspect-video relative overflow-hidden">
-                          <div className="absolute inset-0 bg-gradient-to-t from-card/90 to-transparent z-10" />
-                          <img
-                            src={urlFor(activity.image)}
-                            alt={activity.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
-                          <div className="absolute top-3 left-3 z-20">
-                            <Badge
-                              variant="outline"
-                              className={`${config?.color || 'bg-primary/10 text-primary'} text-xs font-medium flex items-center gap-1`}
-                            >
-                              <CategoryIcon className="w-3 h-3" />
-                              {config?.label || 'Activity'}
-                            </Badge>
-                          </div>
-                          <div className="absolute bottom-3 left-3 z-20 flex items-center gap-2 text-xs text-white/90">
-                            <Calendar className="w-3.5 h-3.5" />
-                            {new Date(activity.date).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                            })}
-                          </div>
-                        </div>
-                      )}
-                      <CardContent className="p-5">
-                        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors mb-2 text-lg">
-                          {activity.title}
-                        </h3>
-                        <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
-                          {activity.description}
-                        </p>
-                        {activity.venue && (
-                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <MapPin className="w-3.5 h-3.5" />
-                            {activity.venue}
+                  return (
+                    <motion.div
+                      key={activity._id}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <Card className="group h-full bg-card/50 border-border/50 hover:border-primary/30 transition-all overflow-hidden">
+                        {activity.image && (
+                          <div className="aspect-video relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-t from-card/90 to-transparent z-10" />
+                            <img
+                              src={urlFor(activity.image)}
+                              alt={activity.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                            <div className="absolute top-3 left-3 z-20">
+                              <Badge
+                                variant="outline"
+                                className={`${config?.color || 'bg-primary/10 text-primary'} text-xs font-medium flex items-center gap-1`}
+                              >
+                                <CategoryIcon className="w-3 h-3" />
+                                {config?.label || 'Activity'}
+                              </Badge>
+                            </div>
+                            <div className="absolute bottom-3 left-3 z-20 flex items-center gap-2 text-xs text-white/90">
+                              <Calendar className="w-3.5 h-3.5" />
+                              {new Date(activity.date).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                              })}
+                            </div>
                           </div>
                         )}
-                        {activity.highlights && activity.highlights.length > 0 && (
-                          <div className="mt-3 pt-3 border-t border-border/50">
-                            <p className="text-xs font-medium text-foreground mb-2">Highlights:</p>
-                            <ul className="space-y-1">
-                              {activity.highlights.slice(0, 2).map((highlight, i) => (
-                                <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                                  <Star className="w-3 h-3 text-primary mt-0.5 flex-shrink-0" />
-                                  {highlight}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                );
-              })}
-            </div>
+                        <CardContent className="p-5">
+                          <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors mb-2 text-lg">
+                            {activity.title}
+                          </h3>
+                          <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
+                            {activity.description}
+                          </p>
+                          {activity.venue && (
+                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                              <MapPin className="w-3.5 h-3.5" />
+                              {activity.venue}
+                            </div>
+                          )}
+                          {activity.highlights && activity.highlights.length > 0 && (
+                            <div className="mt-3 pt-3 border-t border-border/50">
+                              <p className="text-xs font-medium text-foreground mb-2">Highlights:</p>
+                              <ul className="space-y-1">
+                                {activity.highlights.slice(0, 2).map((highlight, i) => (
+                                  <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                                    <Star className="w-3 h-3 text-primary mt-0.5 flex-shrink-0" />
+                                    {highlight}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  );
+                })}
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="mt-12">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious 
+                          onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                          className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                        />
+                      </PaginationItem>
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            onClick={() => handlePageChange(page)}
+                            isActive={currentPage === page}
+                            className="cursor-pointer"
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ))}
+                      <PaginationItem>
+                        <PaginationNext 
+                          onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                          className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </>
           ) : (
             <div className="text-center py-20 text-muted-foreground">
               <Sparkles className="w-16 h-16 mx-auto mb-4 opacity-30" />

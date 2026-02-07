@@ -66,47 +66,56 @@ const AnnouncementBanner = () => {
         className={`relative bg-gradient-to-r ${bgGradient} text-primary-foreground overflow-hidden`}
       >
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-center gap-3 py-2.5 sm:py-3">
-            <Megaphone className="w-4 h-4 flex-shrink-0 animate-pulse" />
+          <div className="flex items-center justify-between gap-2 py-2.5 sm:py-3">
+            {/* Left section - Icon */}
+            <div className="flex-shrink-0">
+              <Megaphone className="w-4 h-4 animate-pulse" />
+            </div>
             
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="font-semibold text-xs sm:text-sm truncate">
-                {current.title}:
-              </span>
-              <span className="text-xs sm:text-sm text-primary-foreground/90 truncate hidden sm:inline">
-                {current.message}
-              </span>
+            {/* Center section - Content (takes remaining space) */}
+            <div className="flex-1 min-w-0 flex items-center justify-center gap-2">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="font-semibold text-xs sm:text-sm whitespace-nowrap">
+                  {current.title}
+                </span>
+                <span className="hidden xs:inline">:</span>
+                <span className="text-xs sm:text-sm text-primary-foreground/90 truncate hidden sm:inline max-w-[200px] lg:max-w-none">
+                  {current.message}
+                </span>
+              </div>
+
+              {current.link && (
+                <Link 
+                  to={current.link}
+                  className="hidden sm:flex items-center gap-0.5 text-xs font-medium hover:underline flex-shrink-0 ml-1"
+                >
+                  <span className="hidden md:inline">Learn more</span>
+                  <span className="md:hidden">More</span>
+                  <ChevronRight className="w-3 h-3" />
+                </Link>
+              )}
+
+              {announcements.length > 1 && (
+                <div className="hidden md:flex items-center gap-1 ml-2">
+                  {announcements.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentIndex(idx)}
+                      className={`w-1.5 h-1.5 rounded-full transition-all ${
+                        idx === currentIndex 
+                          ? 'bg-primary-foreground' 
+                          : 'bg-primary-foreground/40 hover:bg-primary-foreground/60'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
-            {current.link && (
-              <Link 
-                to={current.link}
-                className="flex items-center gap-1 text-xs font-medium hover:underline flex-shrink-0"
-              >
-                Learn more
-                <ChevronRight className="w-3 h-3" />
-              </Link>
-            )}
-
-            {announcements.length > 1 && (
-              <div className="hidden sm:flex items-center gap-1 ml-2">
-                {announcements.map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setCurrentIndex(idx)}
-                    className={`w-1.5 h-1.5 rounded-full transition-all ${
-                      idx === currentIndex 
-                        ? 'bg-primary-foreground' 
-                        : 'bg-primary-foreground/40 hover:bg-primary-foreground/60'
-                    }`}
-                  />
-                ))}
-              </div>
-            )}
-
+            {/* Right section - Close button */}
             <button
               onClick={() => setIsVisible(false)}
-              className="ml-2 p-1 rounded-full hover:bg-primary-foreground/20 transition-colors flex-shrink-0"
+              className="flex-shrink-0 p-1 rounded-full hover:bg-primary-foreground/20 transition-colors"
               aria-label="Close announcement"
             >
               <X className="w-3.5 h-3.5" />
